@@ -9,4 +9,4 @@ create_build_dir:
 run: create_build_dir
 	go build -trimpath -o ./_build/server  ./cmd/server
 
-	./_build/server
+	./_build/server --debug

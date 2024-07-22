@@ -78,19 +78,3 @@ func (c *Controller) HandleHeaderAuth(ctx context.Context, operationName string,
 
 	return ctx, nil
 }
-
-func (c *Controller) APIFsCreatePost(ctx context.Context, req server.APIFsCreatePostReq, params server.APIFsCreatePostParams) (server.APIFsCreatePostRes, error) {
-	return nil, nil
-}
-
-func (c *Controller) APIFsDeletePost(ctx context.Context, req *server.APIFsDeletePostReq) (server.APIFsDeletePostRes, error) {
-	return nil, nil
-}
-
-func (c *Controller) APIFsGetGet(ctx context.Context, params server.APIFsGetGetParams) (server.APIFsGetGetRes, error) {
-	return nil, nil
-}
-
-func (c *Controller) APIFsIdsGet(ctx context.Context) (server.APIFsIdsGetRes, error) {
-	return nil, nil
-}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"hgnextfs/internal/entities"
 	"io"
 	"log/slog"
 	"os"
@@ -20,7 +21,7 @@ func (s *Storage) Create(ctx context.Context, fileID uuid.UUID, body io.Reader) 
 	}
 
 	if info != nil {
-		return fmt.Errorf("local fs: file exists")
+		return fmt.Errorf("local fs: %w", entities.FileAlreadyExistsError)
 	}
 
 	f, err := os.Create(filepath)

@@ -30,24 +30,43 @@ func Serve() {
 
 	logger := initLogger(cfg)
 
-	exportStorage, err := exportFS.New(cfg.ExportPath, logger)
-	if err != nil {
-		logger.ErrorContext(
-			ctx, "fail init export fs",
-			slog.Any("error", err),
-		)
+	var (
+		exportStorage *exportFS.Storage
+		fileStorage   *dataFS.Storage
+	)
 
-		os.Exit(1)
+	if cfg.ExportPath != "" {
+		exportStorage, err = exportFS.New(cfg.ExportPath, logger)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init export fs",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+
+		logger.DebugContext(
+			ctx, "use local export storage",
+			slog.String("path", cfg.ExportPath),
+		)
 	}
 
-	fileStorage, err := dataFS.New(cfg.FilePath, logger)
-	if err != nil {
-		logger.ErrorContext(
-			ctx, "fail init data fs",
-			slog.Any("error", err),
-		)
+	if cfg.FilePath != "" {
+		fileStorage, err = dataFS.New(cfg.FilePath, logger)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init data fs",
+				slog.Any("error", err),
+			)
 
-		os.Exit(1)
+			os.Exit(1)
+		}
+
+		logger.DebugContext(
+			ctx, "use local file storage",
+			slog.String("path", cfg.FilePath),
+		)
 	}
 
 	// TODO: перейти со временем на юзкейсы
