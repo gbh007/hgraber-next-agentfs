@@ -13,4 +13,4 @@ build-arm64: create_build_dir
 run: create_build_dir
 	go build -trimpath -o ./_build/server  ./cmd/server
 
-	./_build/server --debug --addr 127.0.0.1:8081 --token agent-token --export-path ./.hidden/export --data-path ./.hidden/filedata
+	./_build/server --debug --addr 127.0.0.1:8081 --token agent-token --export-path ./.hidden/export --data-path ./.hidden/filedata --trace-endpoint http://localhost:4318/v1/traces

@@ -30,6 +30,18 @@ func Serve() {
 
 	logger := initLogger(cfg)
 
+	if cfg.TraceEndpoint != "" {
+		err := initTrace(ctx, cfg.TraceEndpoint)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init otel",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+	}
+
 	var (
 		exportStorage *exportFS.Storage
 		fileStorage   *dataFS.Storage

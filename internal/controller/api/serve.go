@@ -5,12 +5,15 @@ import (
 	"errors"
 	"net/http"
 	"time"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 // FIXME: реализовать
 func (c *Controller) Serve(parentCtx context.Context) error {
 	server := &http.Server{
-		Handler: c.logIO(cors(c.ogenServer)),
+		Handler: otelPropagation(c.logIO(cors(c.ogenServer))),
 		Addr:    c.addr,
 	}
 
@@ -52,6 +55,19 @@ func cors(next http.Handler) http.Handler {
 
 		if next != nil {
 			next.ServeHTTP(w, r)
+		}
+	})
+}
+
+func otelPropagation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := otel.GetTextMapPropagator().Extract(
+			r.Context(),
+			propagation.HeaderCarrier(r.Header),
+		)
+
+		if next != nil {
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})
 }
