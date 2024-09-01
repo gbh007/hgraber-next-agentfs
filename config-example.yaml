@@ -7,3 +7,8 @@ application:
 fs_base:
   export_path: ./.hidden/export
   file_path: ./.hidden/filedata
+sqlite:
+  file_path: db.sqlite
+zip_scanner:
+  master_addr: http://localhost:8080
+  master_token: local-next

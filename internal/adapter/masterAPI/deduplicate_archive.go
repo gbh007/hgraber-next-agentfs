@@ -1,4 +1,4 @@
-package masterapi
+package masterAPI
 
 import (
 	"context"

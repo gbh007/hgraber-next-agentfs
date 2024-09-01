@@ -4,7 +4,10 @@ import (
 	"context"
 	"hgnextfs/internal/adapter/dataFS"
 	"hgnextfs/internal/adapter/exportFS"
+	"hgnextfs/internal/adapter/masterAPI"
+	"hgnextfs/internal/adapter/storage"
 	"hgnextfs/internal/controller/api"
+	"hgnextfs/internal/usecases/exportDeduplicator"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -24,7 +27,7 @@ func Serve() {
 	)
 	defer cancel()
 
-	cfg, err := parseConfig()
+	cfg, needScan, err := parseConfig()
 	if err != nil {
 		// Поскольку на этот момент нет ни логгера ни вообще ничего то выкидываем панику.
 		panic(err)
@@ -47,12 +50,16 @@ func Serve() {
 	tracer := otel.GetTracerProvider().Tracer("hgraber-next")
 
 	var (
-		exportStorage *exportFS.Storage
-		fileStorage   *dataFS.Storage
+		exportStorage api.ExportUseCase
+		fileStorage   api.FileUseCase
+
+		exportStorageRaw *exportFS.Storage
+		dbRaw            *storage.Storage
+		mAPI             *masterAPI.Client
 	)
 
 	if cfg.FSBase.ExportPath != "" {
-		exportStorage, err = exportFS.New(cfg.FSBase.ExportPath, logger)
+		exportStorageRaw, err = exportFS.New(cfg.FSBase.ExportPath, logger)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init export fs",
@@ -61,6 +68,8 @@ func Serve() {
 
 			os.Exit(1)
 		}
+
+		exportStorage = exportStorageRaw
 
 		logger.DebugContext(
 			ctx, "use local export storage",
@@ -83,6 +92,44 @@ func Serve() {
 			ctx, "use local file storage",
 			slog.String("path", cfg.FSBase.FilePath),
 		)
+	}
+
+	if cfg.Sqlite.FilePath != "" {
+		dbRaw, err = storage.New(ctx, logger, cfg.Sqlite.FilePath)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init db",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+	}
+
+	if cfg.ZipScanner.MasterAddr != "" {
+		mAPI, err = masterAPI.New(cfg.ZipScanner.MasterAddr, cfg.ZipScanner.MasterToken)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init master api",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+	}
+
+	if needScan {
+		err = exportDeduplicator.New(logger, exportStorageRaw, dbRaw, mAPI).ScanZips(ctx)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail scan zips",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+
+		return
 	}
 
 	// TODO: перейти со временем на юзкейсы

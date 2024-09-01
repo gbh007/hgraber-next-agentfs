@@ -12,11 +12,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type exportUseCase interface {
+type ExportUseCase interface {
 	Create(ctx context.Context, bookID uuid.UUID, bookName string, body io.Reader) error
 }
 
-type fileUseCase interface {
+type FileUseCase interface {
 	Create(ctx context.Context, fileID uuid.UUID, body io.Reader) error
 	Delete(ctx context.Context, fileID uuid.UUID) error
 	Get(ctx context.Context, fileID uuid.UUID) (io.Reader, error)
@@ -32,8 +32,8 @@ type Controller struct {
 
 	ogenServer *agentAPI.Server
 
-	exportUseCase exportUseCase
-	fileUseCase   fileUseCase
+	exportUseCase ExportUseCase
+	fileUseCase   FileUseCase
 
 	token string
 }
@@ -42,8 +42,8 @@ func New(
 	startAt time.Time,
 	logger *slog.Logger,
 	tracer trace.Tracer,
-	exportUseCase exportUseCase,
-	fileUseCase fileUseCase,
+	exportUseCase ExportUseCase,
+	fileUseCase FileUseCase,
 	addr string,
 	debug bool,
 	token string,

@@ -2,3 +2,5 @@
 _build
 .env
 config.yaml
+*.db
+*.sqlite

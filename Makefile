@@ -12,12 +12,18 @@ build-arm64: create_build_dir
 
 .PHONY: run-example
 run-example: create_build_dir
-	go build -trimpath -o ./_build/server  ./cmd/server
+	CGO_ENABLED=0 go build -trimpath -o ./_build/server  ./cmd/server
 
 	./_build/server --config config-example.yaml
 
 .PHONY: run
 run: create_build_dir
-	go build -trimpath -o ./_build/server  ./cmd/server
+	CGO_ENABLED=0 go build -trimpath -o ./_build/server  ./cmd/server
 
 	./_build/server
+
+.PHONY: scan
+scan: create_build_dir
+	CGO_ENABLED=0 go build -trimpath -o ./_build/server  ./cmd/server
+
+	./_build/server --scan
