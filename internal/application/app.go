@@ -10,6 +10,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"go.opentelemetry.io/otel"
 )
 
 func Serve() {
@@ -41,6 +43,8 @@ func Serve() {
 			os.Exit(1)
 		}
 	}
+
+	tracer := otel.GetTracerProvider().Tracer("hgraber-next")
 
 	var (
 		exportStorage *exportFS.Storage
@@ -85,6 +89,7 @@ func Serve() {
 	c, err := api.New(
 		time.Now(),
 		logger,
+		tracer,
 		exportStorage,
 		fileStorage,
 		cfg.API.Addr,

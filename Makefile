@@ -1,6 +1,7 @@
 .PHONY: generate
 generate:
-	go run github.com/ogen-go/ogen/cmd/ogen@v1.2.1 --target internal/controller/api/internal/server --package server --clean internal/controller/api/internal/agent.yaml
+	go run github.com/ogen-go/ogen/cmd/ogen@v1.2.1 --target open_api/agentAPI -package agentAPI --clean open_api/agent.yaml
+	go run github.com/ogen-go/ogen/cmd/ogen@v1.2.1 --target open_api/serverAPI -package serverAPI --clean open_api/server.yaml
 
 create_build_dir:
 	mkdir -p ./_build
@@ -14,7 +15,6 @@ run-example: create_build_dir
 	go build -trimpath -o ./_build/server  ./cmd/server
 
 	./_build/server --config config-example.yaml
-
 
 .PHONY: run
 run: create_build_dir

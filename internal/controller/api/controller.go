@@ -3,12 +3,13 @@ package api
 import (
 	"context"
 	"errors"
-	"hgnextfs/internal/controller/api/internal/server"
+	"hgnextfs/open_api/agentAPI"
 	"io"
 	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type exportUseCase interface {
@@ -25,10 +26,11 @@ type fileUseCase interface {
 type Controller struct {
 	startAt time.Time
 	logger  *slog.Logger
+	tracer  trace.Tracer
 	addr    string
 	debug   bool
 
-	ogenServer *server.Server
+	ogenServer *agentAPI.Server
 
 	exportUseCase exportUseCase
 	fileUseCase   fileUseCase
@@ -39,6 +41,7 @@ type Controller struct {
 func New(
 	startAt time.Time,
 	logger *slog.Logger,
+	tracer trace.Tracer,
 	exportUseCase exportUseCase,
 	fileUseCase fileUseCase,
 	addr string,
@@ -48,6 +51,7 @@ func New(
 	c := &Controller{
 		startAt:       startAt,
 		logger:        logger,
+		tracer:        tracer,
 		addr:          addr,
 		debug:         debug,
 		token:         token,
@@ -55,7 +59,7 @@ func New(
 		fileUseCase:   fileUseCase,
 	}
 
-	ogenServer, err := server.NewServer(c, c)
+	ogenServer, err := agentAPI.NewServer(c, c)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +71,7 @@ func New(
 
 var errorAccessForbidden = errors.New("access forbidden")
 
-func (c *Controller) HandleHeaderAuth(ctx context.Context, operationName string, t server.HeaderAuth) (context.Context, error) {
+func (c *Controller) HandleHeaderAuth(ctx context.Context, operationName string, t agentAPI.HeaderAuth) (context.Context, error) {
 	if c.token == "" {
 		return ctx, nil
 	}

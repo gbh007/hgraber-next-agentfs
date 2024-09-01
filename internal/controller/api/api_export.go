@@ -2,24 +2,24 @@ package api
 
 import (
 	"context"
-	"hgnextfs/internal/controller/api/internal/server"
+	"hgnextfs/open_api/agentAPI"
 )
 
-func (c *Controller) APIExportArchivePost(ctx context.Context, req server.APIExportArchivePostReq, params server.APIExportArchivePostParams) (server.APIExportArchivePostRes, error) {
+func (c *Controller) APIExportArchivePost(ctx context.Context, req agentAPI.APIExportArchivePostReq, params agentAPI.APIExportArchivePostParams) (agentAPI.APIExportArchivePostRes, error) {
 	if c.exportUseCase == nil {
-		return &server.APIExportArchivePostBadRequest{
+		return &agentAPI.APIExportArchivePostBadRequest{
 			InnerCode: ValidationCode,
-			Details:   server.NewOptString("unsupported api"),
+			Details:   agentAPI.NewOptString("unsupported api"),
 		}, nil
 	}
 
 	err := c.exportUseCase.Create(ctx, params.BookID, params.BookName, req.Data)
 	if err != nil {
-		return &server.APIExportArchivePostInternalServerError{
+		return &agentAPI.APIExportArchivePostInternalServerError{
 			InnerCode: ExportUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
-	return &server.APIExportArchivePostNoContent{}, nil
+	return &agentAPI.APIExportArchivePostNoContent{}, nil
 }

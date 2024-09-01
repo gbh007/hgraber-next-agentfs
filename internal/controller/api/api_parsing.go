@@ -2,33 +2,40 @@ package api
 
 import (
 	"context"
-	"hgnextfs/internal/controller/api/internal/server"
+	"hgnextfs/open_api/agentAPI"
 )
 
-func (c *Controller) APIParsingBookCheckPost(ctx context.Context, req *server.APIParsingBookCheckPostReq) (server.APIParsingBookCheckPostRes, error) {
-	return &server.APIParsingBookCheckPostBadRequest{
+func (c *Controller) APIParsingBookCheckPost(ctx context.Context, req *agentAPI.APIParsingBookCheckPostReq) (agentAPI.APIParsingBookCheckPostRes, error) {
+	return &agentAPI.APIParsingBookCheckPostBadRequest{
 		InnerCode: ValidationCode,
-		Details:   server.NewOptString("unsupported api"),
+		Details:   agentAPI.NewOptString("unsupported api"),
 	}, nil
 }
 
-func (c *Controller) APIParsingBookPost(ctx context.Context, req *server.APIParsingBookPostReq) (server.APIParsingBookPostRes, error) {
-	return &server.APIParsingBookPostBadRequest{
+func (c *Controller) APIParsingBookPost(ctx context.Context, req *agentAPI.APIParsingBookPostReq) (agentAPI.APIParsingBookPostRes, error) {
+	return &agentAPI.APIParsingBookPostBadRequest{
 		InnerCode: ValidationCode,
-		Details:   server.NewOptString("unsupported api"),
+		Details:   agentAPI.NewOptString("unsupported api"),
 	}, nil
 }
 
-func (c *Controller) APIParsingPageCheckPost(ctx context.Context, req *server.APIParsingPageCheckPostReq) (server.APIParsingPageCheckPostRes, error) {
-	return &server.APIParsingPageCheckPostBadRequest{
+func (c *Controller) APIParsingPageCheckPost(ctx context.Context, req *agentAPI.APIParsingPageCheckPostReq) (agentAPI.APIParsingPageCheckPostRes, error) {
+	return &agentAPI.APIParsingPageCheckPostBadRequest{
 		InnerCode: ValidationCode,
-		Details:   server.NewOptString("unsupported api"),
+		Details:   agentAPI.NewOptString("unsupported api"),
 	}, nil
 }
 
-func (c *Controller) APIParsingPagePost(ctx context.Context, req *server.APIParsingPagePostReq) (server.APIParsingPagePostRes, error) {
-	return &server.APIParsingPagePostBadRequest{
+func (c *Controller) APIParsingPagePost(ctx context.Context, req *agentAPI.APIParsingPagePostReq) (agentAPI.APIParsingPagePostRes, error) {
+	return &agentAPI.APIParsingPagePostBadRequest{
 		InnerCode: ValidationCode,
-		Details:   server.NewOptString("unsupported api"),
+		Details:   agentAPI.NewOptString("unsupported api"),
+	}, nil
+}
+
+func (c *Controller) APIParsingBookMultiPost(ctx context.Context, req *agentAPI.APIParsingBookMultiPostReq) (agentAPI.APIParsingBookMultiPostRes, error) {
+	return &agentAPI.APIParsingBookMultiPostBadRequest{
+		InnerCode: ValidationCode,
+		Details:   agentAPI.NewOptString("unsupported api"),
 	}, nil
 }
