@@ -9,8 +9,15 @@ create_build_dir:
 build-arm64: create_build_dir
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o ./_build/hgraber-agentfs-arm64 ./cmd/server
 
+.PHONY: run-example
+run-example: create_build_dir
+	go build -trimpath -o ./_build/server  ./cmd/server
+
+	./_build/server --config config-example.yaml
+
+
 .PHONY: run
 run: create_build_dir
 	go build -trimpath -o ./_build/server  ./cmd/server
 
-	./_build/server --config config-example.yaml
+	./_build/server
