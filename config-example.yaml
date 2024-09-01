@@ -1,0 +1,9 @@
+api:
+  addr: 127.0.0.1:8081
+  token: agent-token
+application:
+  debug: true
+  # trace_endpoint: http://localhost:4318/v1/traces
+fs_base:
+  export_path: ./.hidden/export
+  file_path: ./.hidden/filedata

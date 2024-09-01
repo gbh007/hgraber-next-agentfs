@@ -1,33 +1,46 @@
 package application
 
-import "flag"
+import (
+	"flag"
+	"fmt"
+	"hgnextfs/internal/config"
+	"os"
 
-type Config struct {
-	FilePath      string
-	ExportPath    string
-	WebServerAddr string
-	APIToken      string
-	TraceEndpoint string
-	Debug         bool
-}
+	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/yaml.v2"
+)
 
-func parseConfig() (Config, error) {
-	addr := flag.String("addr", ":8080", "Адрес сервера API")
-	token := flag.String("token", "", "Токен для доступа к API")
-	debug := flag.Bool("debug", false, "Режим отладки")
-	exportPath := flag.String("export-path", "", "Путь для экспорта")
-	filePath := flag.String("data-path", "", "Путь для файловой системы")
-	traceEndpoint := flag.String("trace-endpoint", "", "Путь для телеметрии OTEL")
-
+func parseConfig() (config.Config, error) {
+	configPath := flag.String("config", "config.yaml", "path to config")
+	printCfg := flag.String("print-config", "", "generate example config")
 	flag.Parse()
 
-	c := Config{
-		FilePath:      *filePath,
-		ExportPath:    *exportPath,
-		WebServerAddr: *addr,
-		APIToken:      *token,
-		Debug:         *debug,
-		TraceEndpoint: *traceEndpoint,
+	if *printCfg != "" {
+		err := config.ExportToFile(config.DefaultConfig(), *printCfg)
+		if err != nil {
+			panic(err)
+		}
+
+		os.Exit(0)
+	}
+
+	c := config.DefaultConfig()
+
+	f, err := os.Open(*configPath)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("open config file: %w", err)
+	}
+
+	defer f.Close()
+
+	err = yaml.NewDecoder(f).Decode(&c)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("decode yaml: %w", err)
+	}
+
+	err = envconfig.Process("APP", &c)
+	if err != nil {
+		return config.Config{}, fmt.Errorf("decode env: %w", err)
 	}
 
 	return c, nil

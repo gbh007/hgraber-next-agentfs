@@ -30,8 +30,8 @@ func Serve() {
 
 	logger := initLogger(cfg)
 
-	if cfg.TraceEndpoint != "" {
-		err := initTrace(ctx, cfg.TraceEndpoint)
+	if cfg.Application.TraceEndpoint != "" {
+		err := initTrace(ctx, cfg.Application.TraceEndpoint)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init otel",
@@ -47,8 +47,8 @@ func Serve() {
 		fileStorage   *dataFS.Storage
 	)
 
-	if cfg.ExportPath != "" {
-		exportStorage, err = exportFS.New(cfg.ExportPath, logger)
+	if cfg.FSBase.ExportPath != "" {
+		exportStorage, err = exportFS.New(cfg.FSBase.ExportPath, logger)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init export fs",
@@ -60,12 +60,12 @@ func Serve() {
 
 		logger.DebugContext(
 			ctx, "use local export storage",
-			slog.String("path", cfg.ExportPath),
+			slog.String("path", cfg.FSBase.ExportPath),
 		)
 	}
 
-	if cfg.FilePath != "" {
-		fileStorage, err = dataFS.New(cfg.FilePath, logger)
+	if cfg.FSBase.FilePath != "" {
+		fileStorage, err = dataFS.New(cfg.FSBase.FilePath, logger)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init data fs",
@@ -77,7 +77,7 @@ func Serve() {
 
 		logger.DebugContext(
 			ctx, "use local file storage",
-			slog.String("path", cfg.FilePath),
+			slog.String("path", cfg.FSBase.FilePath),
 		)
 	}
 
@@ -87,9 +87,9 @@ func Serve() {
 		logger,
 		exportStorage,
 		fileStorage,
-		cfg.WebServerAddr,
-		cfg.Debug,
-		cfg.APIToken,
+		cfg.API.Addr,
+		cfg.Application.Debug,
+		cfg.API.Token,
 	)
 	if err != nil {
 		logger.ErrorContext(
