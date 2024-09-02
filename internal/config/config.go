@@ -38,8 +38,9 @@ func DefaultAPI() API {
 }
 
 type FSBase struct {
-	ExportPath string `envconfig:"EXPORT_PATH" yaml:"export_path"`
-	FilePath   string `envconfig:"FILE_PATH" yaml:"file_path"`
+	ExportPath          string `envconfig:"EXPORT_PATH" yaml:"export_path"`
+	FilePath            string `envconfig:"FILE_PATH" yaml:"file_path"`
+	EnableDeduplication bool   `envconfig:"ENABLE_DEDUPLICATION" yaml:"enable_deduplication"`
 }
 
 func DefaultFSBase() FSBase {

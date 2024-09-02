@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"hgnextfs/internal/entities"
 	"hgnextfs/open_api/agentAPI"
 	"io"
 	"log/slog"
@@ -13,7 +14,7 @@ import (
 )
 
 type ExportUseCase interface {
-	Create(ctx context.Context, bookID uuid.UUID, bookName string, body io.Reader) error
+	Create(ctx context.Context, data entities.ExportData) error
 }
 
 type FileUseCase interface {

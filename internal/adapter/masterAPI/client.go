@@ -61,10 +61,5 @@ func (s securitySource) HeaderAuth(ctx context.Context, operationName string) (s
 }
 
 func (s securitySource) Cookies(ctx context.Context, operationName string) (serverAPI.Cookies, error) {
-	// FIXME: убрать если не будет проблем.
-	// return serverAPI.Cookies{
-	// 	APIKey: s.token,
-	// }, nil
-
 	return serverAPI.Cookies{}, ogenerrors.ErrSkipClientSecurity
 }

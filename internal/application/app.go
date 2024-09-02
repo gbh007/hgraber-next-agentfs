@@ -7,6 +7,7 @@ import (
 	"hgnextfs/internal/adapter/masterAPI"
 	"hgnextfs/internal/adapter/storage"
 	"hgnextfs/internal/controller/api"
+	"hgnextfs/internal/usecases/exportAPI"
 	"hgnextfs/internal/usecases/exportDeduplicator"
 	"log/slog"
 	"os"
@@ -119,6 +120,12 @@ func Serve() {
 	}
 
 	if needScan {
+		if dbRaw == nil || exportStorageRaw == nil || mAPI == nil {
+			logger.ErrorContext(ctx, "invalid scan dependencies")
+
+			os.Exit(1)
+		}
+
 		err = exportDeduplicator.New(logger, exportStorageRaw, dbRaw, mAPI).ScanZips(ctx)
 		if err != nil {
 			logger.ErrorContext(
@@ -130,6 +137,12 @@ func Serve() {
 		}
 
 		return
+	}
+
+	if cfg.FSBase.EnableDeduplication && dbRaw != nil && exportStorageRaw != nil {
+		exportStorage = exportAPI.New(logger, dbRaw, exportStorageRaw)
+
+		logger.DebugContext(ctx, "use export deduplication")
 	}
 
 	// TODO: перейти со временем на юзкейсы

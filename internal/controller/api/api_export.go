@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"hgnextfs/internal/entities"
 	"hgnextfs/open_api/agentAPI"
 )
 
@@ -13,7 +14,11 @@ func (c *Controller) APIExportArchivePost(ctx context.Context, req agentAPI.APIE
 		}, nil
 	}
 
-	err := c.exportUseCase.Create(ctx, params.BookID, params.BookName, req.Data)
+	err := c.exportUseCase.Create(ctx, entities.ExportData{
+		BookID:   params.BookID,
+		BookName: params.BookName,
+		Body:     req.Data,
+	})
 	if err != nil {
 		return &agentAPI.APIExportArchivePostInternalServerError{
 			InnerCode: ExportUseCaseCode,

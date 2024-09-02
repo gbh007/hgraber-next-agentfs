@@ -29,12 +29,16 @@ func New(path string, logger *slog.Logger) (*Storage, error) {
 	}, nil
 }
 
-func (s *Storage) filepath(bookID uuid.UUID, bookName string) string {
-	return path.Join(s.fsPath, fmt.Sprintf(
+func (s *Storage) filepath(bookID uuid.UUID, bookName string) (relativePath, absolutePath string) {
+	relativePath = fmt.Sprintf(
 		"%s %s.zip",
 		bookID.String(),
 		escapeFileName(bookName),
-	))
+	)
+
+	absolutePath = path.Join(s.fsPath, relativePath)
+
+	return
 }
 
 func escapeFileName(n string) string {
