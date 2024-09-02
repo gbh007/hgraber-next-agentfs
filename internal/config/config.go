@@ -41,6 +41,7 @@ type FSBase struct {
 	ExportPath          string `envconfig:"EXPORT_PATH" yaml:"export_path"`
 	FilePath            string `envconfig:"FILE_PATH" yaml:"file_path"`
 	EnableDeduplication bool   `envconfig:"ENABLE_DEDUPLICATION" yaml:"enable_deduplication"`
+	ExportLimitOnFolder int    `envconfig:"EXPORT_LIMIT_ON_FOLDER" yaml:"export_limit_on_folder"`
 }
 
 func DefaultFSBase() FSBase {

@@ -23,7 +23,23 @@ func (s *Storage) CreateExport(ctx context.Context, data entities.ExportData) (s
 }
 
 func (s *Storage) create(ctx context.Context, data entities.ExportData) (string, error) {
-	relativePath, absolutePath := s.filepath(data.BookID, data.BookName)
+	var (
+		relativePath, absolutePath string
+		err                        error
+	)
+
+	if s.limitOnFolder > 0 {
+		s.fsLimitMutex.Lock()
+		// TODO: подумать над многопоточным способом (включая необходимость)
+		defer s.fsLimitMutex.Unlock()
+
+		relativePath, absolutePath, err = s.filepathWithLimits(data.BookID, data.BookName)
+		if err != nil {
+			return "", fmt.Errorf("get filepath with limits: %w", err)
+		}
+	} else {
+		relativePath, absolutePath = s.filepath(data.BookID, data.BookName)
+	}
 
 	f, err := os.Create(absolutePath)
 	if err != nil {

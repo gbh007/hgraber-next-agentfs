@@ -60,7 +60,7 @@ func Serve() {
 	)
 
 	if cfg.FSBase.ExportPath != "" {
-		exportStorageRaw, err = exportFS.New(cfg.FSBase.ExportPath, logger)
+		exportStorageRaw, err = exportFS.New(cfg.FSBase.ExportPath, logger, cfg.FSBase.ExportLimitOnFolder)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init export fs",
