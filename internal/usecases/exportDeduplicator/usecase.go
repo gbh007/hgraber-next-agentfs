@@ -14,6 +14,7 @@ type exportFS interface {
 
 type storage interface {
 	CreateExport(ctx context.Context, info entities.ExportInfo) error
+	CreateMissing(ctx context.Context, path string, maxEntryPercentage float64) error
 	// GetExportByPath(ctx context.Context, relativePath string) ([]entities.ExportInfo, error)
 	// GetExportByBookID(ctx context.Context, bookID uuid.UUID) ([]entities.ExportInfo, error)
 }

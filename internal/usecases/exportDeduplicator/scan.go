@@ -34,6 +34,11 @@ func (uc *UseCase) ScanZips(ctx context.Context) error {
 			return fmt.Errorf("master api match (%s): %w", relativePath, err)
 		}
 
+		var (
+			matched            bool
+			maxEntryPercentage float64
+		)
+
 		for _, match := range matches {
 			if match.EntryPercentage > minEntryPercentage &&
 				match.ReverseEntryPercentage > minEntryPercentage {
@@ -46,6 +51,19 @@ func (uc *UseCase) ScanZips(ctx context.Context) error {
 				if err != nil {
 					return fmt.Errorf("storage create export info (%s): %w", relativePath, err)
 				}
+
+				matched = true
+			}
+
+			if match.EntryPercentage > maxEntryPercentage {
+				maxEntryPercentage = match.EntryPercentage
+			}
+		}
+
+		if !matched {
+			err = uc.storage.CreateMissing(ctx, relativePath, maxEntryPercentage)
+			if err != nil {
+				return fmt.Errorf("storage create missing info (%s): %w", relativePath, err)
 			}
 		}
 	}
