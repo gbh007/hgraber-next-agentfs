@@ -20,10 +20,13 @@ func DefaultConfig() Config {
 type Application struct {
 	Debug         bool   `envconfig:"DEBUG" yaml:"debug"`
 	TraceEndpoint string `envconfig:"TRACE_ENDPOINT" yaml:"trace_endpoint"`
+	ServiceName   string `envconfig:"SERVICE_NAME" yaml:"service_name"`
 }
 
 func DefaultApplication() Application {
-	return Application{}
+	return Application{
+		ServiceName: "hgraber-next-agentfs",
+	}
 }
 
 type API struct {

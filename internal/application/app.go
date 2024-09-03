@@ -37,7 +37,7 @@ func Serve() {
 	logger := initLogger(cfg)
 
 	if cfg.Application.TraceEndpoint != "" {
-		err := initTrace(ctx, cfg.Application.TraceEndpoint)
+		err := initTrace(ctx, cfg.Application.TraceEndpoint, cfg.Application.ServiceName)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init otel",

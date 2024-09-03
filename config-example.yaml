@@ -4,6 +4,7 @@ api:
 application:
   debug: true
   # trace_endpoint: http://localhost:4318/v1/traces
+  service_name: hgraber-next-agentfs-local
 fs_base:
   export_path: ./.hidden/export
   file_path: ./.hidden/filedata
