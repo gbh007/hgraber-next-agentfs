@@ -15,18 +15,26 @@ type Storage struct {
 	fsLimitMutex  sync.Mutex
 
 	logger *slog.Logger
+
+	useUnsafeCloser bool
 }
 
-func New(path string, logger *slog.Logger, limitOnFolder int) (*Storage, error) {
+func New(
+	path string,
+	logger *slog.Logger,
+	limitOnFolder int,
+	useUnsafeCloser bool,
+) (*Storage, error) {
 	err := createDir(path)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Storage{
-		fsPath:        path,
-		logger:        logger,
-		limitOnFolder: limitOnFolder,
+		fsPath:          path,
+		logger:          logger,
+		limitOnFolder:   limitOnFolder,
+		useUnsafeCloser: useUnsafeCloser,
 	}, nil
 }
 

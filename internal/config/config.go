@@ -18,9 +18,10 @@ func DefaultConfig() Config {
 }
 
 type Application struct {
-	Debug         bool   `envconfig:"DEBUG" yaml:"debug"`
-	TraceEndpoint string `envconfig:"TRACE_ENDPOINT" yaml:"trace_endpoint"`
-	ServiceName   string `envconfig:"SERVICE_NAME" yaml:"service_name"`
+	Debug           bool   `envconfig:"DEBUG" yaml:"debug"`
+	TraceEndpoint   string `envconfig:"TRACE_ENDPOINT" yaml:"trace_endpoint"`
+	ServiceName     string `envconfig:"SERVICE_NAME" yaml:"service_name"`
+	UseUnsafeCloser bool   `envconfig:"USE_UNSAFE_CLOSER" yaml:"use_unsafe_closer"`
 }
 
 func DefaultApplication() Application {

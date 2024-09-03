@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"hgnextfs/internal/pkg"
 	"io"
 	"os"
 	"path"
@@ -13,6 +14,12 @@ func (s *Storage) Get(ctx context.Context, relativePath string) (io.Reader, erro
 	f, err := os.Open(path.Join(s.fsPath, relativePath))
 	if err != nil {
 		return nil, fmt.Errorf("export fs: open: %w", err)
+	}
+
+	if s.useUnsafeCloser {
+		return &pkg.UnsafeCloser{
+			Body: f,
+		}, nil
 	}
 
 	defer f.Close()
