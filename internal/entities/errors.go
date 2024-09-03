@@ -21,3 +21,13 @@ var (
 	AgentAPIConflict        = errors.New("agent: conflict")
 	AgentAPIUnknownResponse = errors.New("agent: unknown response")
 )
+
+var (
+	MasterAPIOffline         = errors.New("master: offline")
+	MasterAPIUnauthorized    = errors.New("master: unauthorized")
+	MasterAPIForbidden       = errors.New("master: forbidden")
+	MasterAPIBadRequest      = errors.New("master: bad request")
+	MasterAPIInternalError   = errors.New("master: internal error")
+	MasterAPIConflict        = errors.New("master: conflict")
+	MasterAPIUnknownResponse = errors.New("master: unknown response")
+)

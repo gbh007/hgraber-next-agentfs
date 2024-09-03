@@ -4,12 +4,18 @@ import (
 	"context"
 	"hgnextfs/internal/adapter/dataFS"
 	"hgnextfs/internal/adapter/exportFS"
+	"hgnextfs/internal/adapter/masterAPI"
+	"hgnextfs/internal/adapter/storage"
 	"hgnextfs/internal/controller/api"
+	"hgnextfs/internal/usecases/exportAPI"
+	"hgnextfs/internal/usecases/exportDeduplicator"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"go.opentelemetry.io/otel"
 )
 
 func Serve() {
@@ -22,7 +28,7 @@ func Serve() {
 	)
 	defer cancel()
 
-	cfg, err := parseConfig()
+	cfg, needScan, err := parseConfig()
 	if err != nil {
 		// Поскольку на этот момент нет ни логгера ни вообще ничего то выкидываем панику.
 		panic(err)
@@ -31,7 +37,7 @@ func Serve() {
 	logger := initLogger(cfg)
 
 	if cfg.Application.TraceEndpoint != "" {
-		err := initTrace(ctx, cfg.Application.TraceEndpoint)
+		err := initTrace(ctx, cfg.Application.TraceEndpoint, cfg.Application.ServiceName)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init otel",
@@ -42,13 +48,19 @@ func Serve() {
 		}
 	}
 
+	tracer := otel.GetTracerProvider().Tracer("hgraber-next")
+
 	var (
-		exportStorage *exportFS.Storage
-		fileStorage   *dataFS.Storage
+		exportStorage api.ExportUseCase
+		fileStorage   api.FileUseCase
+
+		exportStorageRaw *exportFS.Storage
+		dbRaw            *storage.Storage
+		mAPI             *masterAPI.Client
 	)
 
 	if cfg.FSBase.ExportPath != "" {
-		exportStorage, err = exportFS.New(cfg.FSBase.ExportPath, logger)
+		exportStorageRaw, err = exportFS.New(cfg.FSBase.ExportPath, logger, cfg.FSBase.ExportLimitOnFolder, cfg.Application.UseUnsafeCloser)
 		if err != nil {
 			logger.ErrorContext(
 				ctx, "fail init export fs",
@@ -57,6 +69,8 @@ func Serve() {
 
 			os.Exit(1)
 		}
+
+		exportStorage = exportStorageRaw
 
 		logger.DebugContext(
 			ctx, "use local export storage",
@@ -81,10 +95,61 @@ func Serve() {
 		)
 	}
 
+	if cfg.Sqlite.FilePath != "" {
+		dbRaw, err = storage.New(ctx, logger, cfg.Sqlite.FilePath)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init db",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+	}
+
+	if cfg.ZipScanner.MasterAddr != "" {
+		mAPI, err = masterAPI.New(cfg.ZipScanner.MasterAddr, cfg.ZipScanner.MasterToken)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail init master api",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+	}
+
+	if needScan {
+		if dbRaw == nil || exportStorageRaw == nil || mAPI == nil {
+			logger.ErrorContext(ctx, "invalid scan dependencies")
+
+			os.Exit(1)
+		}
+
+		err = exportDeduplicator.New(logger, exportStorageRaw, dbRaw, mAPI).ScanZips(ctx)
+		if err != nil {
+			logger.ErrorContext(
+				ctx, "fail scan zips",
+				slog.Any("error", err),
+			)
+
+			os.Exit(1)
+		}
+
+		return
+	}
+
+	if cfg.FSBase.EnableDeduplication && dbRaw != nil && exportStorageRaw != nil {
+		exportStorage = exportAPI.New(logger, dbRaw, exportStorageRaw)
+
+		logger.DebugContext(ctx, "use export deduplication")
+	}
+
 	// TODO: перейти со временем на юзкейсы
 	c, err := api.New(
 		time.Now(),
 		logger,
+		tracer,
 		exportStorage,
 		fileStorage,
 		cfg.API.Addr,

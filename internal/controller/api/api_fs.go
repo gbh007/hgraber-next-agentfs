@@ -3,108 +3,108 @@ package api
 import (
 	"context"
 	"errors"
-	"hgnextfs/internal/controller/api/internal/server"
 	"hgnextfs/internal/entities"
+	"hgnextfs/open_api/agentAPI"
 )
 
-func (c *Controller) APIFsCreatePost(ctx context.Context, req server.APIFsCreatePostReq, params server.APIFsCreatePostParams) (server.APIFsCreatePostRes, error) {
+func (c *Controller) APIFsCreatePost(ctx context.Context, req agentAPI.APIFsCreatePostReq, params agentAPI.APIFsCreatePostParams) (agentAPI.APIFsCreatePostRes, error) {
 	if c.fileUseCase == nil {
-		return &server.APIFsCreatePostBadRequest{
+		return &agentAPI.APIFsCreatePostBadRequest{
 			InnerCode: ValidationCode,
-			Details:   server.NewOptString("unsupported api"),
+			Details:   agentAPI.NewOptString("unsupported api"),
 		}, nil
 	}
 
 	err := c.fileUseCase.Create(ctx, params.FileID, req.Data)
 	if errors.Is(err, entities.FileAlreadyExistsError) {
-		return &server.APIFsCreatePostConflict{
+		return &agentAPI.APIFsCreatePostConflict{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
 	if err != nil {
-		return &server.APIFsCreatePostInternalServerError{
+		return &agentAPI.APIFsCreatePostInternalServerError{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
-	return &server.APIFsCreatePostNoContent{}, nil
+	return &agentAPI.APIFsCreatePostNoContent{}, nil
 }
 
-func (c *Controller) APIFsDeletePost(ctx context.Context, req *server.APIFsDeletePostReq) (server.APIFsDeletePostRes, error) {
+func (c *Controller) APIFsDeletePost(ctx context.Context, req *agentAPI.APIFsDeletePostReq) (agentAPI.APIFsDeletePostRes, error) {
 	if c.fileUseCase == nil {
-		return &server.APIFsDeletePostBadRequest{
+		return &agentAPI.APIFsDeletePostBadRequest{
 			InnerCode: ValidationCode,
-			Details:   server.NewOptString("unsupported api"),
+			Details:   agentAPI.NewOptString("unsupported api"),
 		}, nil
 	}
 
 	err := c.fileUseCase.Delete(ctx, req.FileID)
 	if errors.Is(err, entities.FileNotFoundError) {
-		return &server.APIFsDeletePostNotFound{
+		return &agentAPI.APIFsDeletePostNotFound{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
 	if err != nil {
-		return &server.APIFsDeletePostInternalServerError{
+		return &agentAPI.APIFsDeletePostInternalServerError{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
-	return &server.APIFsDeletePostNoContent{}, nil
+	return &agentAPI.APIFsDeletePostNoContent{}, nil
 }
 
-func (c *Controller) APIFsGetGet(ctx context.Context, params server.APIFsGetGetParams) (server.APIFsGetGetRes, error) {
+func (c *Controller) APIFsGetGet(ctx context.Context, params agentAPI.APIFsGetGetParams) (agentAPI.APIFsGetGetRes, error) {
 	if c.fileUseCase == nil {
-		return &server.APIFsGetGetBadRequest{
+		return &agentAPI.APIFsGetGetBadRequest{
 			InnerCode: ValidationCode,
-			Details:   server.NewOptString("unsupported api"),
+			Details:   agentAPI.NewOptString("unsupported api"),
 		}, nil
 	}
 
 	body, err := c.fileUseCase.Get(ctx, params.FileID)
 	if errors.Is(err, entities.FileNotFoundError) {
-		return &server.APIFsGetGetNotFound{
+		return &agentAPI.APIFsGetGetNotFound{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
 	if err != nil {
-		return &server.APIFsGetGetInternalServerError{
+		return &agentAPI.APIFsGetGetInternalServerError{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
 	// FIXME: работать с типом контента как в основном сервере
-	return &server.APIFsGetGetOK{
+	return &agentAPI.APIFsGetGetOK{
 		Data: body,
 	}, nil
 }
 
-func (c *Controller) APIFsIdsGet(ctx context.Context) (server.APIFsIdsGetRes, error) {
+func (c *Controller) APIFsIdsGet(ctx context.Context) (agentAPI.APIFsIdsGetRes, error) {
 	if c.fileUseCase == nil {
-		return &server.APIFsIdsGetBadRequest{
+		return &agentAPI.APIFsIdsGetBadRequest{
 			InnerCode: ValidationCode,
-			Details:   server.NewOptString("unsupported api"),
+			Details:   agentAPI.NewOptString("unsupported api"),
 		}, nil
 	}
 
 	ids, err := c.fileUseCase.IDs(ctx)
 	if err != nil {
-		return &server.APIFsIdsGetInternalServerError{
+		return &agentAPI.APIFsIdsGetInternalServerError{
 			InnerCode: FileUseCaseCode,
-			Details:   server.NewOptString(err.Error()),
+			Details:   agentAPI.NewOptString(err.Error()),
 		}, nil
 	}
 
-	resp := server.APIFsIdsGetOKApplicationJSON(ids)
+	resp := agentAPI.APIFsIdsGetOKApplicationJSON(ids)
 
 	return &resp, nil
 }

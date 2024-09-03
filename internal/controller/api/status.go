@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
-	"hgnextfs/internal/controller/api/internal/server"
+	"hgnextfs/open_api/agentAPI"
 )
 
-func (c *Controller) APICoreStatusGet(ctx context.Context) (server.APICoreStatusGetRes, error) {
-	return &server.APICoreStatusGetOK{
+func (c *Controller) APICoreStatusGet(ctx context.Context) (agentAPI.APICoreStatusGetRes, error) {
+	return &agentAPI.APICoreStatusGetOK{
 		StartAt: c.startAt,
-		Status:  server.APICoreStatusGetOKStatusOk,
+		Status:  agentAPI.APICoreStatusGetOKStatusOk,
 	}, nil
 }

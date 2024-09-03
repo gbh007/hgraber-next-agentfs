@@ -19,7 +19,7 @@ func initLogger(cfg config.Config) *slog.Logger {
 		slogOpt.Level = slog.LevelDebug
 	}
 
-	return slog.New(
+	logger := slog.New(
 		logHandler{
 			Handler: slog.NewJSONHandler(
 				os.Stderr,
@@ -27,6 +27,12 @@ func initLogger(cfg config.Config) *slog.Logger {
 			),
 		},
 	)
+
+	if cfg.Application.ServiceName != "" {
+		logger = logger.With(slog.String("service_name", cfg.Application.ServiceName))
+	}
+
+	return logger
 }
 
 // TODO: в случае использования групп реализовать более безопасно.

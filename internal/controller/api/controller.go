@@ -3,19 +3,21 @@ package api
 import (
 	"context"
 	"errors"
-	"hgnextfs/internal/controller/api/internal/server"
+	"hgnextfs/internal/entities"
+	"hgnextfs/open_api/agentAPI"
 	"io"
 	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/trace"
 )
 
-type exportUseCase interface {
-	Create(ctx context.Context, bookID uuid.UUID, bookName string, body io.Reader) error
+type ExportUseCase interface {
+	Create(ctx context.Context, data entities.ExportData) error
 }
 
-type fileUseCase interface {
+type FileUseCase interface {
 	Create(ctx context.Context, fileID uuid.UUID, body io.Reader) error
 	Delete(ctx context.Context, fileID uuid.UUID) error
 	Get(ctx context.Context, fileID uuid.UUID) (io.Reader, error)
@@ -25,13 +27,14 @@ type fileUseCase interface {
 type Controller struct {
 	startAt time.Time
 	logger  *slog.Logger
+	tracer  trace.Tracer
 	addr    string
 	debug   bool
 
-	ogenServer *server.Server
+	ogenServer *agentAPI.Server
 
-	exportUseCase exportUseCase
-	fileUseCase   fileUseCase
+	exportUseCase ExportUseCase
+	fileUseCase   FileUseCase
 
 	token string
 }
@@ -39,8 +42,9 @@ type Controller struct {
 func New(
 	startAt time.Time,
 	logger *slog.Logger,
-	exportUseCase exportUseCase,
-	fileUseCase fileUseCase,
+	tracer trace.Tracer,
+	exportUseCase ExportUseCase,
+	fileUseCase FileUseCase,
 	addr string,
 	debug bool,
 	token string,
@@ -48,6 +52,7 @@ func New(
 	c := &Controller{
 		startAt:       startAt,
 		logger:        logger,
+		tracer:        tracer,
 		addr:          addr,
 		debug:         debug,
 		token:         token,
@@ -55,7 +60,7 @@ func New(
 		fileUseCase:   fileUseCase,
 	}
 
-	ogenServer, err := server.NewServer(c, c)
+	ogenServer, err := agentAPI.NewServer(c, c)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +72,7 @@ func New(
 
 var errorAccessForbidden = errors.New("access forbidden")
 
-func (c *Controller) HandleHeaderAuth(ctx context.Context, operationName string, t server.HeaderAuth) (context.Context, error) {
+func (c *Controller) HandleHeaderAuth(ctx context.Context, operationName string, t agentAPI.HeaderAuth) (context.Context, error) {
 	if c.token == "" {
 		return ctx, nil
 	}

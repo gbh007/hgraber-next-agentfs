@@ -6,13 +6,14 @@ import (
 	"os"
 )
 
-func parseConfig() (config.Config, error) {
+func parseConfig() (config.Config, bool, error) {
 	configPath := flag.String("config", "config.yaml", "path to config")
-	printCfg := flag.String("print-config", "", "generate example config")
+	generateConfig := flag.String("generate-config", "", "generate example config")
+	scan := flag.Bool("scan", false, "scan zip file to register in db")
 	flag.Parse()
 
-	if *printCfg != "" {
-		err := config.ExportToFile(config.DefaultConfig(), *printCfg)
+	if *generateConfig != "" {
+		err := config.ExportToFile(config.DefaultConfig(), *generateConfig)
 		if err != nil {
 			panic(err)
 		}
@@ -20,5 +21,7 @@ func parseConfig() (config.Config, error) {
 		os.Exit(0)
 	}
 
-	return config.ImportConfig(*configPath, true)
+	c, err := config.ImportConfig(*configPath, true)
+
+	return c, *scan, err
 }
