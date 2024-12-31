@@ -15,6 +15,9 @@ type exportFS interface {
 type storage interface {
 	CreateExport(ctx context.Context, info entities.ExportInfo) error
 	CreateMissing(ctx context.Context, path string, maxEntryPercentage float64) error
+
+	ExportedCountByRelativePath(ctx context.Context, path string) (int, error)
+	TruncateMissing(ctx context.Context) error
 }
 
 type masterAPI interface {

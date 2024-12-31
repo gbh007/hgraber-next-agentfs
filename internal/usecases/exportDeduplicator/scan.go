@@ -16,6 +16,11 @@ func (uc *UseCase) ScanZips(ctx context.Context) error {
 		return fmt.Errorf("export fs: scan all zip: %w", err)
 	}
 
+	err = uc.storage.TruncateMissing(ctx)
+	if err != nil {
+		return fmt.Errorf("export fs: truncate missing: %w", err)
+	}
+
 	for i, relativePath := range relativePaths {
 		uc.logger.DebugContext(
 			ctx, "start match archive",
@@ -23,6 +28,15 @@ func (uc *UseCase) ScanZips(ctx context.Context) error {
 			slog.Int("total", len(relativePaths)),
 			slog.String("path", relativePath),
 		)
+
+		c, err := uc.storage.ExportedCountByRelativePath(ctx, relativePath)
+		if err != nil {
+			return fmt.Errorf("export fs: get exported count (%s): %w", relativePath, err)
+		}
+
+		if c > 0 {
+			continue
+		}
 
 		body, err := uc.exportFS.Get(ctx, relativePath)
 		if err != nil {

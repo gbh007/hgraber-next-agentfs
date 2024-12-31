@@ -19,3 +19,12 @@ func (s *Storage) CreateMissing(ctx context.Context, path string, maxEntryPercen
 
 	return nil
 }
+
+func (s *Storage) TruncateMissing(ctx context.Context) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM missing_infos;`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
